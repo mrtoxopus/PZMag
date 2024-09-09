@@ -1,0 +1,67 @@
+﻿@page "/cable-datagrid"
+@using System.Data
+@inject IDbConnection dbConnection
+
+<DataGrid TItem="Cable"
+          Data="@cables"
+          Editable
+          Sortable
+          SortMode="DataGridSortMode.Single"
+          ShowPager
+          ShowPageSizes
+          Resizable
+          Responsive
+          Bordered
+          Hoverable
+          Narrow
+          Groupable
+          ShowGrouping
+          ResizeMode="TableResizeMode.Columns"
+          NewItemCreator="() => new Cable { Name = string.Empty, Amount = 0, NrTaken = 0 }">
+    <DataGridColumns>
+        <DataGridColumn Field="@nameof(Cable.Name)" Caption="Name" Editable></DataGridColumn>
+        <DataGridColumn Field="@nameof(Cable.Amount)" Caption="Amount" Editable></DataGridColumn>
+        <DataGridColumn Field="@nameof(Cable.NrTaken)" Caption="Number Taken" Editable></DataGridColumn>
+        <DataGridColumn Field="@nameof(Cable.CableId)" Caption="Cable ID" Editable></DataGridColumn>
+        <DataGridCommandColumn PreventRowClick>
+            <NewCommandTemplate>
+                <Button Color="Color.Success" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </NewCommandTemplate>
+            <EditCommandTemplate>
+                <Button Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </EditCommandTemplate>
+            <SaveCommandTemplate>
+                <Button Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </SaveCommandTemplate>
+            <DeleteCommandTemplate>
+                <Button Color="Color.Danger" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </DeleteCommandTemplate>
+            <CancelCommandTemplate>
+                <Button Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </CancelCommandTemplate>
+            <ClearFilterCommandTemplate>
+                <Button Color="Color.Warning" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </ClearFilterCommandTemplate>
+        </DataGridCommandColumn>
+    </DataGridColumns>
+</DataGrid>
+
+@code {
+    private List<Cable> cables;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using (var connection = dbConnection)
+        {
+            cables = (await connection.QueryAsync<Cable>("SELECT * FROM cable")).ToList();
+        }
+    }
+
+    public class Cable
+    {
+        public int CableId { get; set; }
+        public string Name { get; set; }
+        public decimal Amount { get; set; }
+        public int NrTaken { get; set; }
+    }
+}
